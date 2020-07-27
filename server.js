@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
+require('dotenv').config()
+
 const { v4: uuid } = require('uuid')
 
 // set our viewing engine to use EJS template
@@ -30,4 +32,8 @@ io.on('connection', socket => {
     })
 })
 
-server.listen(3000)
+srv = server.listen(process.env.PORT || 3000)
+
+app.use('/peerjs', require('peer').ExpressPeerServer(server, {
+	debug: true
+}))
