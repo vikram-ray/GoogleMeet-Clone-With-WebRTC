@@ -10,7 +10,7 @@ const videoGrid = document.getElementById('video-grid')
 
 var myPeer = new Peer({
 	host: location.hostname,
-	port: location.port || (location.protocol === 'https:' ? 443 : 80),
+	port: 9000 || location.port || (location.protocol === 'https:' ? 443 : 80),
 	path: '/peerjs'
 })
 
@@ -26,9 +26,14 @@ navigator.mediaDevices.getUserMedia({
     myPeer.on('call', call => {
         call.answer(stream)
         const video = document.createElement('video')
+        // video.setAttribute("id", userId);
+
         call.on('stream', userVideoStream => {
+            console.log('STREAM IS RECEIVED FROM CALL');
             addVideoStream(video, userVideoStream)
         })
+        call.on('close', function() { console.log('CLOSED') });
+        call.on('error', function(err) { console.log('ERROR'); });
     })
     socket.on('new-user-connected', userId => {
         connectToNewUser(userId, stream)
@@ -51,10 +56,13 @@ function addVideoStream(video, stream) {
     videoGrid.append(video)
 }
 
-// make call
+// make call to new user connected with (his UserID , my video stream)
 function connectToNewUser (userId, stream) {
-    const call = myPeer.call(userId, stream)
+    console.log('CALLING USER ');
+    const call = myPeer.call(userId, stream )
     const video = document.createElement('video')
+    // video.setAttribute("id", userId);
+
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
     })
@@ -62,4 +70,6 @@ function connectToNewUser (userId, stream) {
         video.remove()
     })
     peers[userId] = call
+    console.log(peers);
+
 }
